@@ -2129,6 +2129,12 @@
             "lease_commence_date": "2012"
         }
     ],
+    "121445": [
+        {
+            "town": "CLEMENTI",
+            "lease_commence_date": "2021"
+        }
+    ],
     "122208": [
         {
             "town": "CLEMENTI",
@@ -2993,6 +2999,12 @@
             "lease_commence_date": "1971"
         }
     ],
+    "142040": [
+        {
+            "town": "QUEENSTOWN",
+            "lease_commence_date": "2022"
+        }
+    ],
     "142044": [
         {
             "town": "QUEENSTOWN",
@@ -3087,6 +3099,12 @@
         {
             "town": "QUEENSTOWN",
             "lease_commence_date": "1971"
+        }
+    ],
+    "143042": [
+        {
+            "town": "QUEENSTOWN",
+            "lease_commence_date": "2022"
         }
     ],
     "143061": [

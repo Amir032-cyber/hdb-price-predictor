@@ -97,7 +97,7 @@ docker push <dockerhub-username>/hdb-predictor-app:latest
 ## 📈 Data
 
 - **Model Training Data**: Based on historical [HDB Resale Flat Prices](https://data.gov.sg/datasets?query=hdb+resale)
-- **Data Last Updated (Reference in App)**: 31-05-2025
+- **Data Last Updated (Reference in App)**: 30-06-2025
 
 ## 🛠 Built With
 

@@ -1,0 +1,37 @@
+name: Predictor smoke check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  predictor:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Check app syntax and model artifacts
+        run: |
+          python -m py_compile app.py
+          python - <<'PY'
+          import joblib
+          import xgboost as xgb
+
+          scaler = joblib.load("scaler.joblib")
+          model = xgb.Booster()
+          model.load_model("model.bst")
+          if model.num_features() != len(scaler.mean_):
+              raise SystemExit("Model and scaler feature counts do not match")
+          print(f"Loaded predictor artifacts with {model.num_features()} features")
+          PY

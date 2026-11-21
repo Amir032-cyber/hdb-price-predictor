@@ -33,8 +33,15 @@ jobs:
           scaler = joblib.load("scaler.joblib")
           model = xgb.Booster()
           model.load_model("model.bst")
-          print(f"Model features: {model.num_features()}, scaler features: {scaler.n_features_in_}")
-          print(f"Model feature names: {model.feature_names}")
+          print(f"Current model features: {model.num_features()}, current scaler features: {scaler.n_features_in_}")
+          import subprocess
+          subprocess.run(
+              ["git", "show", "75cc42ca113648940c87a5eda24f017c76867294:scaler.joblib"],
+              check=True,
+              stdout=open("/tmp/previous_scaler.joblib", "wb"),
+          )
+          previous_scaler = joblib.load("/tmp/previous_scaler.joblib")
+          print(f"Previous scaler features: {previous_scaler.n_features_in_}")
           if model.num_features() != scaler.n_features_in_:
               raise SystemExit("Model and scaler feature counts do not match")
           PY

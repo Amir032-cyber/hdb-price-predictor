@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -23,25 +21,33 @@ jobs:
           cache-dependency-path: requirements.txt
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
-      - name: Check app syntax and model artifacts
+      - name: Check app and run an artifact prediction
         run: |
           python -m py_compile app.py
           python - <<'PY'
+          import ast
           import joblib
+          import numpy as np
           import xgboost as xgb
 
+          app = ast.parse(open("app.py", encoding="utf-8").read())
+          features = next(
+              ast.literal_eval(node.value)
+              for node in app.body
+              if isinstance(node, ast.Assign)
+              and any(isinstance(target, ast.Name) and target.id == "FEATURE_NAMES" for target in node.targets)
+          )
           scaler = joblib.load("scaler.joblib")
           model = xgb.Booster()
           model.load_model("model.bst")
-          print(f"Current model features: {model.num_features()}, current scaler features: {scaler.n_features_in_}")
-          import subprocess
-          subprocess.run(
-              ["git", "show", "75cc42ca113648940c87a5eda24f017c76867294:scaler.joblib"],
-              check=True,
-              stdout=open("/tmp/previous_scaler.joblib", "wb"),
-          )
-          previous_scaler = joblib.load("/tmp/previous_scaler.joblib")
-          print(f"Previous scaler features: {previous_scaler.n_features_in_}")
-          if model.num_features() != scaler.n_features_in_:
-              raise SystemExit("Model and scaler feature counts do not match")
+          expected = len(features)
+          if expected != scaler.n_features_in_ or expected != model.num_features():
+              raise SystemExit(
+                  f"Feature schema mismatch: app={expected}, scaler={scaler.n_features_in_}, model={model.num_features()}"
+              )
+          sample = scaler.transform(np.zeros((1, expected), dtype=np.float32))
+          prediction = model.predict(xgb.DMatrix(sample, feature_names=features))
+          if prediction.size != 1 or not np.isfinite(prediction[0]):
+              raise SystemExit("Model returned an invalid prediction")
+          print(f"Artifact smoke prediction succeeded with {expected} features")
           PY

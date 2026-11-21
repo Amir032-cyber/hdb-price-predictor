@@ -32,6 +32,7 @@ jobs:
           model = xgb.Booster()
           model.load_model("model.bst")
           print(f"Model features: {model.num_features()}, scaler features: {scaler.n_features_in_}")
+          print(f"Model feature names: {model.feature_names}")
           if model.num_features() != scaler.n_features_in_:
               raise SystemExit("Model and scaler feature counts do not match")
           PY
